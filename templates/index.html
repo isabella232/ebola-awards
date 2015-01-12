@@ -1,0 +1,88 @@
+{% extends '_base.html' %}
+
+{% block header_content %}
+<header>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
+                <h3 class="npr"><a href="http://npr.org"><img src="http://media.npr.org/chrome/news/nprlogo_138x46.gif" alt="NPR" /></a></h3>
+                <h2>{{ COPY.content.project_kicker|smarty }}</h2>
+                <h1>{{ COPY.content.project_subhead|smarty }}</h1>
+            </div>
+        </div>
+    </div>
+    <img class="img-responsive" src="{{ COPY.content.lead_image }}">
+    <p class="credit">{{ COPY.content.lead_image_credit }}</p>
+</header>
+{% endblock %}
+
+
+{% block content %}
+    <div class="stories top-stories container-fluid">
+        {% for story in COPY.stories %}
+        <div class="story {% if story.large_photo %}large-photo{% endif %}">
+            <a href="{{ story.url }}">
+                <div class="photo">
+                    <img class="img-responsive" src="{{ story.photo }}">
+                    <p class="credit">{{ story.photo_credit }}</p>
+                </div>
+                <div class="story-info">
+                    <h2>{{ story.headline }}</h2>
+                    <p class="byline">By {{ story.byline }}</p>
+                    <p class="teaser">{{ story.teaser }}</p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="graphics">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-10 col-sm-offset-1">
+                    <div class="row">
+                        {% for story in COPY.graphics %}
+                        <div class="story">
+                            <a href="{{ story.url }}">
+                                <div class="photo">
+                                    <div class="promo-image" style="background-image: url('{{ story.photo }}');"></div>
+                                    <p class="credit">{{ story.photo_credit }}</p>
+                                </div>
+                                <div class="story-info">
+                                    <h2>{{ story.headline }}</h2>
+                                    <p class="byline">By {{ story.byline }}</p>
+                                    <p class="teaser">{{ story.teaser }}</p>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stories more-stories container-fluid">
+        {% for story in COPY.more_stories %}
+        <div class="story {% if story.large_photo %}large-photo{% endif %}">
+            <a href="{{ story.url }}">
+                <div class="photo">
+                    <img class="img-responsive" src="{{ story.photo }}">
+                    <p class="credit">{{ story.photo_credit }}</p>
+                </div>
+                <div class="story-info">
+                    <h2>{{ story.headline }}</h2>
+                    <p class="byline">By {{ story.byline }}</p>
+                    <p class="teaser">{{ story.teaser }}</p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}
+
+
+{% block wide_content %}
+{% endblock %}
