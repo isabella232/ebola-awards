@@ -8,7 +8,11 @@ They will be exposed to users. Use environment variables instead.
 See get_secrets() below for a fast way to access them.
 """
 
+import logging
 import os
+
+from authomatic.providers import oauth2
+from authomatic import Authomatic
 
 """
 NAMES
@@ -94,7 +98,7 @@ DEBUG = True
 """
 COPY EDITING
 """
-COPY_GOOGLE_DOC_URL = 'https://docs.google.com/spreadsheet/ccc?key=0Alg9G6ua2W2fdHVvWExITmtiTkhWZXZsMzdfTE1fRmc&usp=drive_web#gid=1'
+COPY_GOOGLE_DOC_KEY = '0Alg9G6ua2W2fdHVvWExITmtiTkhWZXZsMzdfTE1fRmc'
 COPY_PATH = 'data/copy.xlsx'
 
 """
@@ -126,6 +130,30 @@ DISQUS_API_KEY = 'tIbSzEhGBE9NIptbnQWn4wy1gZ546CsQ2IHHtxJiYAceyyPoAkDkVnQfCifmCa
 DISQUS_UUID = '3ee2efba-9a6b-11e4-badf-80e650107db6'
 
 """
+OAUTH
+"""
+
+GOOGLE_OAUTH_CREDENTIALS_PATH = '~/.google_oauth_credentials'
+
+authomatic_config = {
+    'google': {
+        'id': 1,
+        'class_': oauth2.Google,
+        'consumer_key': os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
+        'consumer_secret': os.environ.get('GOOGLE_OAUTH_CONSUMER_SECRET'),
+        'scope': ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/userinfo.email'],
+        'offline': True,
+    },
+}
+
+authomatic = Authomatic(authomatic_config, os.environ.get('AUTHOMATIC_SALT'))
+
+"""
+Logging
+"""
+LOG_FORMAT = '%(levelname)s:%(name)s:%(asctime)s: %(message)s'
+
+"""
 Utilities
 """
 def get_secrets():
@@ -144,6 +172,7 @@ def get_secrets():
 
     return secrets_dict
 
+
 def configure_targets(deployment_target):
     """
     Configure deployment targets. Abstracted so this can be
@@ -157,38 +186,41 @@ def configure_targets(deployment_target):
     global SERVER_LOG_PATH
     global DEBUG
     global DEPLOYMENT_TARGET
-    global DISQUS_SHORTNAME
+    global LOG_LEVEL
+    global ASSETS_MAX_AGE
 
     if deployment_target == 'production':
         S3_BUCKET = PRODUCTION_S3_BUCKET
-        S3_BASE_URL = 'http://%s/%s' % (S3_BUCKET['bucket_name'], PROJECT_SLUG)
-        S3_DEPLOY_URL = 's3://%s/%s' % (S3_BUCKET['bucket_name'], PROJECT_SLUG)
+        S3_BASE_URL = '//%s/%s' % (S3_BUCKET, PROJECT_SLUG)
+        S3_DEPLOY_URL = 's3://%s/%s' % (S3_BUCKET, PROJECT_SLUG)
         SERVERS = PRODUCTION_SERVERS
         SERVER_BASE_URL = 'http://%s/%s' % (SERVERS[0], PROJECT_SLUG)
         SERVER_LOG_PATH = '/var/log/%s' % PROJECT_FILENAME
-        DISQUS_SHORTNAME = 'npr-news'
+        LOG_LEVEL = logging.WARNING
         DEBUG = False
+        ASSETS_MAX_AGE = 86400
     elif deployment_target == 'staging':
         S3_BUCKET = STAGING_S3_BUCKET
-        S3_BASE_URL = 'http://%s/%s' % (S3_BUCKET['bucket_name'], PROJECT_SLUG)
-        S3_DEPLOY_URL = 's3://%s/%s' % (S3_BUCKET['bucket_name'], PROJECT_SLUG)
+        S3_BASE_URL = '//%s/%s' % (S3_BUCKET, PROJECT_SLUG)
+        S3_DEPLOY_URL = 's3://%s/%s' % (S3_BUCKET, PROJECT_SLUG)
         SERVERS = STAGING_SERVERS
         SERVER_BASE_URL = 'http://%s/%s' % (SERVERS[0], PROJECT_SLUG)
         SERVER_LOG_PATH = '/var/log/%s' % PROJECT_FILENAME
-        DISQUS_SHORTNAME = 'nprviz-test'
+        LOG_LEVEL = logging.DEBUG
         DEBUG = True
+        ASSETS_MAX_AGE = 20
     else:
         S3_BUCKET = None
         S3_BASE_URL = 'http://127.0.0.1:8000'
-        S3_DEPLOY_URL = None 
+        S3_DEPLOY_URL = None
         SERVERS = []
         SERVER_BASE_URL = 'http://127.0.0.1:8001/%s' % PROJECT_SLUG
         SERVER_LOG_PATH = '/tmp'
-        DISQUS_SHORTNAME = 'nprviz-test'
+        LOG_LEVEL = logging.DEBUG
         DEBUG = True
+        ASSETS_MAX_AGE = 20
 
     DEPLOYMENT_TARGET = deployment_target
-
 """
 Run automated configuration
 """
